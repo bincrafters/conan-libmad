@@ -1,23 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake, tools, AutoToolsBuildEnvironment
 import os
 
 
-class LibnameConan(ConanFile):
-    name = "libname"
-    version = "0.0.0"
-    description = "Keep it short"
-    # topics can get used for searches, GitHub topics, Bintray tags etc. Add here keywords about the library
-    topics = ("conan", "libname", "logging")
-    url = "https://github.com/bincrafters/conan-libname"
-    homepage = "https://github.com/original_author/original_lib"
+class LibmadConan(ConanFile):
+    name = "libmad"
+    version = "0.15.1b"
+    description = "MAD is a high-quality MPEG audio decoder.format."
+    topics = ("conan", "mad", "MPEG", "audio", "decoder")
+    url = "https://github.com/bincrafters/conan-libmad"
+    homepage = "https://www.underbit.com/products/mad/"
     author = "Bincrafters <bincrafters@gmail.com>"
-    license = "MIT"  # Indicates license type of the packaged library; please use SPDX Identifiers https://spdx.org/licenses/
-    exports = ["LICENSE.md"]      # Packages the license for the conanfile.py
-    # Remove following lines if the target lib does not use cmake.
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    license = "GPL-2.0-only"
+    exports = ["LICENSE.md"]
 
     # Options may need to change depending on the packaged library.
     settings = "os", "arch", "compiler", "build_type"
@@ -37,37 +33,28 @@ class LibnameConan(ConanFile):
         if self.settings.os == 'Windows':
             del self.options.fPIC
 
-    def source(self):
-        source_url = "https://github.com/libauthor/libname"
-        tools.get("{0}/archive/v{1}.tar.gz".format(source_url, self.version), sha256="Please-provide-a-checksum")
-        extracted_dir = self.name + "-" + self.version
+    def configure(self):
+        del self.settings.compiler.libcxx
 
-        # Rename to "source_subfolder" is a convention to simplify later steps
+    def source(self):
+        source_url = "https://vorboss.dl.sourceforge.net/project/mad/libmad/{v}/libmad-{v}.tar.gz".format(v=self.version)
+        tools.get(source_url, sha256="bbfac3ed6bfbc2823d3775ebb931087371e142bb0e9bb1bee51a76a6e0078690")
+        extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TESTS"] = False  # example
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
-
     def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
+        with tools.chdir(self._source_subfolder):
+            if self.options.shared:
+                args = ["--disable-static", "--enable-shared"]
+            else:
+                args = ["--disable-shared", "--enable-static"]
+            env_build = AutoToolsBuildEnvironment(self)
+            env_build.configure(args=args)
+            env_build.make()
+            env_build.install()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
-        # If the CMakeLists.txt has a proper install method, the steps below may be redundant
-        # If so, you can just remove the lines below
-        include_folder = os.path.join(self._source_subfolder, "include")
-        self.copy(pattern="*", dst="include", src=include_folder)
-        self.copy(pattern="*.dll", dst="bin", keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", keep_path=False)
-        self.copy(pattern="*.a", dst="lib", keep_path=False)
-        self.copy(pattern="*.so*", dst="lib", keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["mad"]
