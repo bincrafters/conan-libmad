@@ -49,6 +49,8 @@ class LibmadConan(ConanFile):
 
     def _build_msvc(self):
         with tools.chdir(os.path.join(self._source_subfolder, "msvc++")):
+            # cl : Command line error D8016: '/ZI' and '/Gy-' command-line options are incompatible 
+            tools.replace_in_file("libmad.dsp", "/ZI ", "")
             with tools.vcvars(self.settings):
                 self.run("devenv libmad.dsp /upgrade")
             msbuild = MSBuild(self)
