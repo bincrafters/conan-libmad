@@ -29,7 +29,11 @@ class LibmadConan(ConanFile):
 
     def source(self):
         source_url = "https://vorboss.dl.sourceforge.net/project/mad/libmad/{v}/libmad-{v}.tar.gz".format(v=self.version)
-        tools.get(source_url, sha256="bbfac3ed6bfbc2823d3775ebb931087371e142bb0e9bb1bee51a76a6e0078690")
+        sha256="bbfac3ed6bfbc2823d3775ebb931087371e142bb0e9bb1bee51a76a6e0078690"
+        try:
+            tools.get(source_url, sha256=sha256)
+        except:
+            tools.get("ftp://ftp.mars.org/pub/mpeg/libmad-%s.tar.gz" % self.version, sha256=sha256)
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
