@@ -28,7 +28,7 @@ class LibmadConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def source(self):
-        source_url = "https://vorboss.dl.sourceforge.net/project/mad/libmad/{v}/libmad-{v}.tar.gz".format(v=self.version)
+        source_url = "https://freefr.dl.sourceforge.net/project/mad/libmad/{v}/libmad-{v}.tar.gz".format(v=self.version)
         sha256="bbfac3ed6bfbc2823d3775ebb931087371e142bb0e9bb1bee51a76a6e0078690"
         try:
             tools.get(source_url, sha256=sha256)
