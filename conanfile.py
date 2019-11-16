@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 import os
 
@@ -11,7 +9,6 @@ class LibmadConan(ConanFile):
     topics = ("conan", "mad", "MPEG", "audio", "decoder")
     url = "https://github.com/bincrafters/conan-libmad"
     homepage = "https://www.underbit.com/products/mad/"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "GPL-2.0-only"
     exports = ["LICENSE.md"]
     settings = "os", "arch", "compiler", "build_type"
@@ -26,6 +23,7 @@ class LibmadConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         source_url = "https://freefr.dl.sourceforge.net/project/mad/libmad/{v}/libmad-{v}.tar.gz".format(v=self.version)
