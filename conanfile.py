@@ -4,13 +4,11 @@ import os
 
 class LibmadConan(ConanFile):
     name = "libmad"
-    version = "0.15.1b"
     description = "MAD is a high-quality MPEG audio decoder.format."
     topics = ("conan", "mad", "MPEG", "audio", "decoder")
     url = "https://github.com/bincrafters/conan-libmad"
     homepage = "https://www.underbit.com/products/mad/"
     license = "GPL-2.0-only"
-    exports = ["LICENSE.md"]
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -26,12 +24,7 @@ class LibmadConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        source_url = "https://freefr.dl.sourceforge.net/project/mad/libmad/{v}/libmad-{v}.tar.gz".format(v=self.version)
-        sha256="bbfac3ed6bfbc2823d3775ebb931087371e142bb0e9bb1bee51a76a6e0078690"
-        try:
-            tools.get(source_url, sha256=sha256)
-        except:
-            tools.get("ftp://ftp.mars.org/pub/mpeg/libmad-%s.tar.gz" % self.version, sha256=sha256)
+        tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
@@ -46,8 +39,6 @@ class LibmadConan(ConanFile):
             self._build_configure()
 
     def _build_msvc(self):
-        #if self.settings.arch == "x86_64":
-        #    tools.replace_in_file(os.path.join(self._source_subfolder, "mad.h"), "# define FPM_INTEL", "# define FPM_DEFAULT")
         with tools.chdir(os.path.join(self._source_subfolder, "msvc++")):
             # cl : Command line error D8016: '/ZI' and '/Gy-' command-line options are incompatible 
             tools.replace_in_file("libmad.dsp", "/ZI ", "")
